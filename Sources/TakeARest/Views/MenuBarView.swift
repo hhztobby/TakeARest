@@ -2,7 +2,9 @@ import SwiftUI
 
 struct MenuBarView: View {
     var timerManager: TimerManager
+    var dndManager: DoNotDisturbManager
     @Binding var showSettings: Bool
+    @State private var showDNDConfirm = false
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -30,6 +32,21 @@ struct MenuBarView: View {
                 .padding(.horizontal)
             }
 
+            // DND 状态
+            if dndManager.isDNDActive {
+                HStack {
+                    Image(systemName: "moon.fill")
+                        .foregroundStyle(.purple)
+                    Text("免打扰中")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(dndManager.formattedRemainingTime)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+            }
+
             Divider()
 
             // 开始/停止
@@ -47,6 +64,30 @@ struct MenuBarView: View {
             if timerManager.isRunning {
                 Button("立即提醒") {
                     timerManager.triggerNow()
+                }
+            }
+
+            Divider()
+
+            // 免打扰
+            if dndManager.isDNDActive {
+                Button("关闭免打扰") {
+                    dndManager.stopDND()
+                }
+            } else {
+                Button("开启免打扰") {
+                    showDNDConfirm = true
+                }
+                .popover(isPresented: $showDNDConfirm) {
+                    DNDConfirmView(
+                        onComplete: { duration in
+                            dndManager.startDND(duration: duration)
+                            showDNDConfirm = false
+                        },
+                        onCancel: {
+                            showDNDConfirm = false
+                        }
+                    )
                 }
             }
 

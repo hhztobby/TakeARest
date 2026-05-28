@@ -4,6 +4,7 @@ import SwiftUI
 struct TakeARestApp: App {
     @State private var settings = AppSettings()
     @State private var timerManager: TimerManager
+    @State private var dndManager = DoNotDisturbManager()
     @State private var showSettings = false
 
     init() {
@@ -17,7 +18,14 @@ struct TakeARestApp: App {
 
     var body: some Scene {
         MenuBarExtra("TakeARest", systemImage: "cup.and.saucer.fill") {
-            MenuBarView(timerManager: timerManager, showSettings: $showSettings)
+            MenuBarView(
+                timerManager: timerManager,
+                dndManager: dndManager,
+                showSettings: $showSettings
+            )
+            .onAppear {
+                timerManager.dndManager = dndManager
+            }
         }
 
         Window("TakeARest 设置", id: "settings") {

@@ -22,6 +22,7 @@ class TimerManager {
     private let notificationManager = NotificationManager.shared
     let activityMonitor = ActivityMonitor()
     let screenDetector = ScreenChangeDetector()
+    var dndManager: DoNotDisturbManager?
 
     init(settings: AppSettings) {
         self.settings = settings
@@ -104,6 +105,14 @@ class TimerManager {
     }
 
     private func sendReminder() {
+        // 免打扰期间不发送提醒
+        if dndManager?.isDNDActive == true {
+            // 继续正常计时，但不发送通知
+            state = .working
+            remainingTime = settings.remindInterval
+            startCountdown()
+            return
+        }
         timer?.invalidate()
         state = .reminding
         remainingTime = settings.repeatInterval
