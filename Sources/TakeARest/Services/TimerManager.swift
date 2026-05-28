@@ -17,8 +17,11 @@ class TimerManager {
     var isRunning: Bool = false
 
     private var timer: Timer?
+    private var activityCheckTimer: Timer?
     private let settings: AppSettings
     private let notificationManager = NotificationManager.shared
+    let activityMonitor = ActivityMonitor()
+    let screenDetector = ScreenChangeDetector()
 
     init(settings: AppSettings) {
         self.settings = settings
@@ -39,19 +42,57 @@ class TimerManager {
     func start() {
         guard !isRunning else { return }
         isRunning = true
+        activityMonitor.start()
+        screenDetector.start()
         startWorking()
+        startActivityCheck()
     }
 
     func stop() {
         timer?.invalidate()
+        activityCheckTimer?.invalidate()
         timer = nil
+        activityCheckTimer = nil
         isRunning = false
         state = .idle
         remainingTime = 0
+        screenDetector.stop()
     }
 
     func triggerNow() {
         sendReminder()
+    }
+
+    // MARK: - 活动检测
+
+    private func startActivityCheck() {
+        activityCheckTimer?.invalidate()
+        activityCheckTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.checkUserActivity()
+            }
+        }
+    }
+
+    private func checkUserActivity() {
+        guard isRunning, state == .working || state == .reminding else { return }
+
+        let isActive = activityMonitor.checkActivity(threshold: settings.restThreshold)
+
+        // 如果用户没有键鼠活动，但屏幕在变化（如看视频），仍视为活动中
+        if !isActive && screenDetector.isScreenChanging {
+            return
+        }
+
+        // 用户无活动且屏幕无变化 = 休息状态
+        if !isActive {
+            timer?.invalidate()
+            state = .resting
+            remainingTime = 60
+            startCountdown { [weak self] in
+                self?.startWorking()
+            }
+        }
     }
 
     // MARK: - 状态转换
