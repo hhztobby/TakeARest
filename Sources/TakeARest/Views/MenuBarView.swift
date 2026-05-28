@@ -2,6 +2,8 @@ import SwiftUI
 
 struct MenuBarView: View {
     var timerManager: TimerManager
+    @Binding var showSettings: Bool
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -51,7 +53,7 @@ struct MenuBarView: View {
             Divider()
 
             Button("设置") {
-                // TODO: 第三阶段实现
+                openWindow(id: "settings")
             }
 
             Divider()
