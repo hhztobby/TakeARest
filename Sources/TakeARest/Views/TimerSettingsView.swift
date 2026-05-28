@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TimerSettingsView: View {
     var settings: AppSettings
+    @State private var launchAtLogin = LaunchAtLogin.shared.isEnabled
 
     @State private var remindMinutes: Double
     @State private var repeatMinutes: Double
@@ -18,6 +19,18 @@ struct TimerSettingsView: View {
 
     var body: some View {
         Form {
+            Section("系统设置") {
+                Toggle("开机自启动", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) { _, newValue in
+                        LaunchAtLogin.shared.isEnabled = newValue
+                    }
+
+                Button("检查权限") {
+                    ActivityMonitor.requestAccessibilityPermission()
+                }
+                .help("需要辅助功能权限来检测键盘鼠标活动")
+            }
+
             Section("定时提醒") {
                 HStack {
                     Text("提醒间隔")
