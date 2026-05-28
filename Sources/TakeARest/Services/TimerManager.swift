@@ -23,6 +23,7 @@ class TimerManager {
     let activityMonitor = ActivityMonitor()
     let screenDetector = ScreenChangeDetector()
     var dndManager: DoNotDisturbManager?
+    var statisticsManager: StatisticsManager?
 
     init(settings: AppSettings) {
         self.settings = settings
@@ -124,6 +125,7 @@ class TimerManager {
         timer?.invalidate()
         state = .resting
         remainingTime = 60
+        statisticsManager?.recordRest()
         startCountdown { [weak self] in
             self?.startWorking()
         }

@@ -5,6 +5,7 @@ struct TakeARestApp: App {
     @State private var settings = AppSettings()
     @State private var timerManager: TimerManager
     @State private var dndManager = DoNotDisturbManager()
+    @State private var statisticsManager = StatisticsManager()
     @State private var showSettings = false
 
     init() {
@@ -25,12 +26,13 @@ struct TakeARestApp: App {
             )
             .onAppear {
                 timerManager.dndManager = dndManager
+                timerManager.statisticsManager = statisticsManager
             }
         }
 
         Window("TakeARest 设置", id: "settings") {
-            SettingsView(settings: settings)
+            SettingsView(settings: settings, statisticsManager: statisticsManager)
         }
-        .defaultSize(width: 450, height: 350)
+        .defaultSize(width: 480, height: 380)
     }
 }

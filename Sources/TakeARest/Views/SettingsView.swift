@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     var settings: AppSettings
+    var statisticsManager: StatisticsManager
     @State private var selectedTab = 0
 
     var body: some View {
@@ -18,13 +19,19 @@ struct SettingsView: View {
                 }
                 .tag(1)
 
+            StatisticsView(statisticsManager: statisticsManager)
+                .tabItem {
+                    Label("统计", systemImage: "chart.bar.fill")
+                }
+                .tag(2)
+
             AboutView()
                 .tabItem {
                     Label("关于", systemImage: "info.circle")
                 }
-                .tag(2)
+                .tag(3)
         }
-        .frame(width: 450, height: 350)
+        .frame(width: 480, height: 380)
     }
 }
 
